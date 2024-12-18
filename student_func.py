@@ -1,25 +1,26 @@
 # %% [markdown]
 # # Signal Processing Project: real-time sound localisation
-
+from scipy import signal
 # %% [markdown]
 # ## 1 Offline system
 # ### 1.1 Data generation and dataset
 
 # %%
+import scipy.signal as sc
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-def create_sine_wave(f, A, fs, N):
+# def create_sine_wave(f, A, fs, N):
     
-    # your code here #
+#     your code here #
 
-    return out
+#     return out
 
 # call and test your function here #
-fs =
-N = 
-freq = 
-amplitude =
+# fs =
+# N = 
+# freq = 
+# amplitude =
 
 
 # %%
@@ -27,10 +28,8 @@ from glob import glob
 import scipy.io.wavfile as wf
 
 def read_wavefile(path):
+    return wf.read(path)
 
-    # your code here #
-
-    return out
 
 # call and test your function here #
 LocateClaps = "path/to/LocateClaps/folder"
@@ -43,19 +42,16 @@ files = glob(f"{LocateClaps}/*.wav")
 # %%
 from collections import deque
 
-def create_ringbuffer(maxlen):
-    
-    # your code here #
-
-    return out
+def create_ringbuffer(maxlen) -> deque:
+    return deque(maxlen=maxlen)
 
 # call and test your function here #
-stride = 
-maxlen = 
+# stride = 
+# maxlen = 
 
 # reading your signal as a stream:
-for i, sample in enumerate(your_signal):
-    your_buffer.append(sample)
+# for i, sample in enumerate(your_signal):
+#     your_buffer.append(sample)
 
     # your code here #
 
@@ -64,11 +60,16 @@ for i, sample in enumerate(your_signal):
 # #### 1.3.1 Normalisation
 
 # %%
-def normalise(s):
-    
-    # your code here #
+def get_max(s):
+    max = float('-inf')
+    for i in s:
+        if i > max:
+            max = i
+    return max
 
-    return out
+def normalise(s):
+    max = get_max(s)
+    return s / max
 
 # call and test your function here #
 
@@ -77,29 +78,25 @@ def normalise(s):
 
 # %%
 ## 1 - spectral analysis via spectrogram
-plt.specgram( , Fs= )
-plt.title("Spectrogram")
-plt.show()
+# plt.specgram( , Fs= )
+# plt.title("Spectrogram")
+# plt.show()
 
 ## 2 - Anti-aliasing filter synthesis
 def create_filter_cheby(wp, ws, gpass, gstop, fs):
-
-    # your code here #
-
-    return B, A
+    N, wn = sc.cheb1ord(wp, ws, gpass, gstop, fs=fs)
+    return sc.cheby1(N, gpass, wn, "lowpass", False, fs=fs) # lowpass because we need to filter out frequencies above a certain threshold
 
 def create_filter_cauer(wp, ws, gpass, gstop, fs):
-
-    # your code here #
-
-    return B, A
+    N, wn = signal.ellipord(wp, ws, gpass, gstop, fs=fs)
+    return signal.ellip(N, gpass, gstop, wn, 'lowpass', False, fs=fs) 
 
 ## 3 - Decimation
 def downsampling(sig, B, A, M):
 
     # your code here #
-
-    return out
+    sig = sc.filtfilt(B, A, sig)
+    return sig[::M]
 
 
 # call and test your function here
@@ -109,29 +106,35 @@ def downsampling(sig, B, A, M):
 
 # %%
 ## 1.4
-import scipy.signal as sc
-import numpy as np
 
 def fftxcorr(in1, in2):
-    
-    # your code here #
+    n_1, n_2 = len(in1), len(in2)
+    n = n_1 + n_2 - 1
+    inv_in2 = in2[::-1]
+    x = np.fft.fft(in1, n) * np.fft.fft(inv_in2, n)
 
-    return out
-    
+    return np.fft.ifft(x, n)
+
+
 # call and test your function here #
 
-xcorr_fftconv = sc.fftconvolve(your_signal, your_signal[::-1], 'full') # [::-1] flips the signal but you can also use np.flip()
+# xcorr_fftconv = sc.fftconvolve(your_signal, your_signal[::-1], 'full') # [::-1] flips the signal but you can also use np.flip()
 
 # %% [markdown]
 # ### 1.5 Localisation
 # #### 1.5.1 TDOA
 
 # %%
-def TDOA(xcorr, fs=44100):
-    
-    # your code here #
+def TDOA(xcorr, fs=44.1 * 1000):
+    # Get the sample index with the highest value
+    (i_max, sample_max) = (-float("inf"), -float("inf"))
+    for (i, sample) in enumerate(xcorr):
+        if sample_max < sample:
+            i_max, sample_max = i, sample
+    # Get the middle
+    m = len(xcorr) // 2
 
-    return out
+    return (i_max - m) / fs 
 
 # %% [markdown]
 # #### 1.5.2 Equation system
@@ -158,10 +161,12 @@ def localize_sound(deltas):
     return sol.x
 
 def source_angle(coordinates):
-    
-    # your code here
-
-    return out
+    XS, YS = coordinates
+    out = np.arctan2(YS, XS)* 180/np.pi
+    # print("=> ",coordinates, " | o: ", out )
+    if out < 0:
+        out += 360
+    return out 
 
 # call and test your function here #
 
@@ -170,35 +175,35 @@ def source_angle(coordinates):
 
 # %%
 ## 1.6.1
-def accuracy(pred_angle, gt_angle, threshold):
+# def accuracy(pred_angle, gt_angle, threshold):
     
-    # your code here #
+#     your code here #
 
-    return out
+#     return out
 
 ## 1.6.2
-possible_angle = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
-for angle in possible_angle:
-    for f in files:
-        if f'_{angle}.' in f:
-            mic = f.split('/')[-1].split('_')[0] #if '/' does not work, use "\\" (windows notation)
+# possible_angle = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+# for angle in possible_angle:
+#     for f in files:
+#         if f'_{angle}.' in f:
+#             mic = f.split('/')[-1].split('_')[0] #if '/' does not work, use "\\" (windows notation)
             
 # call and test your function here #
 
 ## 1.6.3
-from time import time_ns, sleep
+# from time import time_ns, sleep
 
-def func_example(a, b):
-    return a*b
+# def func_example(a, b):
+#     return a*b
 
-def time_delay(func, args):
-    start_time = time_ns()
-    out = func(*args)
-    end_time = time_ns()
-    print(f"{func.__name__} in {end_time - start_time} ns")
-    return out
+# def time_delay(func, args):
+#     start_time = time_ns()
+#     out = func(*args)
+#     end_time = time_ns()
+#     print(f"{func.__name__} in {end_time - start_time} ns")
+#     return out
 
-product = time_delay(func_example, [2, 10])
+# product = time_delay(func_example, [2, 10])
 
 # call and test your previous functions here #
 
