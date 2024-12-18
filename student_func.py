@@ -101,12 +101,14 @@ def downsampling(sig, B, A, M):
 ## 1.4
 
 def fftxcorr(in1, in2):
+    
     n_1, n_2 = len(in1), len(in2)
     n = n_1 + n_2 - 1
-    inv_in2 = in2[::-1]
-    x = np.fft.fft(in1, n) * np.fft.fft(inv_in2, n)
+    #n = np.pow(2, int(np.ceil(np.log(n)/np.log(2))))
 
-    return np.fft.ifft(x, n)
+    x = np.fft.fft(in1, n) * np.conjugate(np.fft.fft(in2, n))
+    return np.fft.fftshift(np.fft.ifft(x, n))
+
 
 
 # call and test your function here #
