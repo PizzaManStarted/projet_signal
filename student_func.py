@@ -27,7 +27,8 @@ from glob import glob
 import scipy.io.wavfile as wf
 
 def read_wavefile(path):
-    return wf.read(path)
+    a,b  = wf.read(path)
+    return b, a
 
 
 # call and test your function here #
