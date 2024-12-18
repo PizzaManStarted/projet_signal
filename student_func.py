@@ -10,18 +10,17 @@ import scipy.signal as sc
 import numpy as np
 # import matplotlib.pyplot as plt
 
-# def create_sine_wave(f, A, fs, N):
-    
-#     your code here #
+def create_sine_wave(f, A, fs, N):
+    sampling = np.arange(0, N/fs,1/fs)
+    sin_samples =  np.sin(2 * np.pi * sampling * f)
+    return A * sin_samples
 
-#     return out
 
-# call and test your function here #
-# fs =
-# N = 
-# freq = 
-# amplitude =
-
+fs = 44100
+N = 8000
+freq = 20
+amplitude = 8
+your_signal = create_sine_wave(freq, amplitude, fs, N)
 
 # %%
 from glob import glob
@@ -45,15 +44,9 @@ from collections import deque
 def create_ringbuffer(maxlen) -> deque:
     return deque(maxlen=maxlen)
 
-# call and test your function here #
-# stride = 
-# maxlen = 
 
-# reading your signal as a stream:
-# for i, sample in enumerate(your_signal):
-#     your_buffer.append(sample)
+maxlen = 750
 
-    # your code here #
 
 # %% [markdown]
 # ### 1.3 Pre-processing
@@ -118,7 +111,7 @@ def fftxcorr(in1, in2):
 
 # call and test your function here #
 
-# xcorr_fftconv = sc.fftconvolve(your_signal, your_signal[::-1], 'full') # [::-1] flips the signal but you can also use np.flip()
+xcorr_fftconv = sc.fftconvolve(your_signal, your_signal[::-1], 'full') # [::-1] flips the signal but you can also use np.flip()
 
 # %% [markdown]
 # ### 1.5 Localisation
@@ -175,35 +168,32 @@ def source_angle(coordinates):
 
 # %%
 ## 1.6.1
-# def accuracy(pred_angle, gt_angle, threshold):
-    
-#     your code here #
-
-#     return out
+def accuracy(pred_angle, gt_angle, threshold):
+    return abs(pred_angle - gt_angle) < threshold
 
 ## 1.6.2
-# possible_angle = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
-# for angle in possible_angle:
-#     for f in files:
-#         if f'_{angle}.' in f:
-#             mic = f.split('/')[-1].split('_')[0] #if '/' does not work, use "\\" (windows notation)
+possible_angle = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+for angle in possible_angle:
+    for f in files:
+        if f'_{angle}.' in f:
+            mic = f.split('/')[-1].split('_')[0] #if '/' does not work, use "\\" (windows notation)
             
 # call and test your function here #
 
 ## 1.6.3
-# from time import time_ns, sleep
+from time import time_ns, sleep
 
-# def func_example(a, b):
-#     return a*b
+def func_example(a, b):
+    return a*b
 
-# def time_delay(func, args):
-#     start_time = time_ns()
-#     out = func(*args)
-#     end_time = time_ns()
-#     print(f"{func.__name__} in {end_time - start_time} ns")
-#     return out
+def time_delay(func, args):
+    start_time = time_ns()
+    out = func(*args)
+    end_time = time_ns()
+    print(f"{func.__name__} in {end_time - start_time} ns")
+    return out
 
-# product = time_delay(func_example, [2, 10])
+product = time_delay(func_example, [2, 10])
 
 # call and test your previous functions here #
 
