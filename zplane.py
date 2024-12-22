@@ -19,6 +19,7 @@
 # Alexander Kain for CS506/606 "Special Topics: Speech Signal Processing"
 # CSLU / OHSU, Spring Term 2011.
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 from  matplotlib import patches
